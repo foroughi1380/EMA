@@ -26,10 +26,7 @@ class Encryption{
         if (!input.canRead()) throw NoPermissionException("`${input.absolutePath}` : Permission Denied.")
 
         if (!dir_output.exists()) throw FileAlreadyExistsException("`${dir_output.exists()}` is not exist.")
-        if (!dir_output.isDirectory) throw InvalidPathException(
-            "`${dir_output.absolutePath}` is not a directory.",
-            null
-        )
+        if (!dir_output.isDirectory) throw InvalidPathException("`${dir_output.absolutePath}` is not a directory.", null)
         if (!dir_output.canWrite()) throw NoPermissionException("`${dir_output.absolutePath}` : Permission Denied.")
 
         //init vars
