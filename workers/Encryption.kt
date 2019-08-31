@@ -50,7 +50,7 @@ class Encryption{
     }
 
     //Write , Read Head
-    fun writeHead() : SecretKey{
+    private fun writeHead() : SecretKey{
 
 
         /*
@@ -88,7 +88,7 @@ class Encryption{
         return key
     }
 
-    fun readHead() : HeadFile {
+    private fun readHead() : HeadFile {
         /*
         * this method read head file
         * one byte to version
@@ -136,6 +136,6 @@ class Encryption{
         const val AES = "AES"
         const val RSA = "RSA"
         const val TYPE = "ema"
-        data class HeadFile(val version : Byte , val key: SecretKey , val controller : Short , val name : String) // data class for store read head file
+        private data class HeadFile(val version : Byte , val key: SecretKey , val controller : Short , val name : String) // data class for store read head file
     }
 }
