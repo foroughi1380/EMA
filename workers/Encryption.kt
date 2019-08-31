@@ -50,7 +50,7 @@ class Encryption{
     }
 
     //Write , Read Head
-    private fun writeHead() : SecretKey{
+    private fun writeHead(outputStream: OutputStream) : SecretKey{
 
 
         /*
@@ -84,10 +84,9 @@ class Encryption{
         val cipher = Cipher.getInstance(RSA)
         cipher.init(Cipher.ENCRYPT_MODE , publicKey)
         val ebytes = cipher.doFinal(head_bytes.toByteArray())
-        outFile.writeBytes(ebytes)
+        outputStream.write(ebytes)
         return key
     }
-
     private fun readHead() : HeadFile {
         /*
         * this method read head file
@@ -131,6 +130,10 @@ class Encryption{
         return HeadFile(version , secretKey , controller , name)
     }
 
+    //write and read File
+    fun Encrypt(){
+
+    }
     companion object{
         const val VERSION : Byte = 1
         const val AES = "AES"
