@@ -201,9 +201,6 @@ class Encryption{
             var encode = cipher.doFinal(buff)
 
             if (inStream.available() == 0){ // trim the end of file
-                println(encode.size)
-                println(head.size_controller)
-                println(encode.size - head.size_controller)
                 encode = encode.sliceArray(0 until  (encode.size - head.size_controller))
             }
 
