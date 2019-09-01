@@ -54,7 +54,7 @@ class Encryption{
 
         /*
         *  Head length = 512 Byte
-        *  Head is : |one Byte Version|32 Byte Secret key|2 Byte Controller|
+        *  Head is : |one Byte Version|32 Byte Secret key|2 Byte size Controller|2 byte controller|other byte for name
         * */
         val version = VERSION
 
@@ -64,6 +64,18 @@ class Encryption{
         val key = generator.generateKey()
 
         val name_bytes = input.name.toByteArray()
+
+        //create size controller (convert a short value to 2 byte)
+        var total = inStream.available()
+        var mode = 0
+        if (total < FILE_READ_BUFF){
+            mode = FILE_READ_BUFF - total
+        }else{
+            mode = FILE_READ_BUFF - (total % FILE_READ_BUFF)
+        }
+        var size_controller = ByteArray(2)
+        size_controller[0] = (mode and 0xff).toByte()
+        size_controller[1] = (mode shr 8 and 0xff).toByte()
 
         //create controller (convert a short value to 2 byte)
         val controller = ByteArray(2)
@@ -75,6 +87,7 @@ class Encryption{
         val head_bytes = arrayListOf<Byte>()
         head_bytes.add(version)
         head_bytes.addAll(key.encoded.toList())
+        head_bytes.addAll(size_controller.toList())
         head_bytes.addAll(controller.toList())
         head_bytes.addAll(name_bytes.toList())
 
@@ -95,13 +108,13 @@ class Encryption{
         * and other to name file
         * */
 
-
-
         //init reader
         val cipher = Cipher.getInstance(RSA)
         cipher.init(Cipher.DECRYPT_MODE , privateKey)
         var buff = ByteArray(512)
-        val head_reader = CipherInputStream(inStream , cipher)
+        inStream.read(buff)
+        buff = cipher.doFinal(buff)
+        val head_reader = ByteArrayInputStream(buff)
 
         /* read data*/
 
@@ -115,6 +128,12 @@ class Encryption{
         head_reader.read(buff_secret_key)
         val secretKey = SecretKeySpec(buff_secret_key , AES)
 
+        //read size controller
+        //read controller
+        val buff_size_controller = ByteArray(2)
+        head_reader.read(buff_size_controller)
+        val size_controller : Short = (buff_size_controller[1].toInt() and 0xFF shl 8 or (buff_size_controller[0].toInt() and 0xFF)).toShort()
+
         //read controller
         val buff_controller = ByteArray(2)
         head_reader.read(buff_controller)
@@ -126,11 +145,11 @@ class Encryption{
         val name = String(buff_name)
 
         //create and return the HeadFile
-        return HeadFile(version , secretKey , controller , name)
+        return HeadFile(version , secretKey , size_controller , controller , name)
     }
 
     //write and read File
-    fun Encrypt(listener : ((p : Int) -> Unit)? = null){
+    fun encrypt(listener : ((p : Int) -> Unit)? = null){
         /*
         * this Encrypt the File
         * */
@@ -155,12 +174,52 @@ class Encryption{
         inStream.close()
         outputStream.close()
     }
+    fun decrypt(listener : ((p : Int) -> Unit)? = null , override : ((file_name : String ) -> Boolean)? = null ){
+        /*
+        * this method read head file and create the file
+        * */
+        var head = readHead() // read head file
+        // init cipher
+        var cipher = Cipher.getInstance(AES)
+        cipher.init(Cipher.DECRYPT_MODE , head.key)
+
+
+        //create output file
+        var file = File(output , head.name)
+        if (file.exists() && override != null){ // check and call to user to confirm override
+            if (! override(file.name)) return // override permission is denied
+        }
+
+
+        //get Stream
+        val outputStream = file.outputStream()
+        //start decoding
+        val buff = ByteArray(FILE_READ_BUFF_DECODE)
+        var total = inStream.available()
+        var i = inStream.read(buff)
+        while (i != -1){
+            var encode = cipher.doFinal(buff)
+
+            if (inStream.available() == 0){ // trim the end of file
+                println(encode.size)
+                println(head.size_controller)
+                println(encode.size - head.size_controller)
+                encode = encode.sliceArray(0 until  (encode.size - head.size_controller))
+            }
+
+            outputStream.write(encode)
+            i = inStream.read(buff)
+            listener?.let { it((file.length() / total * 100).toInt())}
+        }
+
+    }
     companion object{
         const val VERSION : Byte = 1
         const val AES = "AES"
         const val RSA = "RSA"
         const val TYPE = "ema"
         private const val FILE_READ_BUFF = 2048
-        private data class HeadFile(val version : Byte , val key: SecretKey , val controller : Short , val name : String) // data class for store read head file
+        private const val FILE_READ_BUFF_DECODE = 2064
+        private data class HeadFile(val version : Byte , val key: SecretKey , val size_controller : Short , val controller : Short , val name : String) // data class for store read head file
     }
 }
