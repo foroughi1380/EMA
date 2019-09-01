@@ -6,13 +6,12 @@ import java.nio.file.InvalidPathException
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.util.RandomAccess
-import javax.crypto.Cipher
-import javax.crypto.CipherInputStream
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
+import java.util.zip.Deflater
+import javax.crypto.*
 import javax.crypto.spec.SecretKeySpec
 import javax.naming.InvalidNameException
 import javax.naming.NoPermissionException
+import javax.print.attribute.standard.Compression
 
 
 class Encryption{
@@ -35,7 +34,7 @@ class Encryption{
         if (!input.canRead()) throw NoPermissionException("`${input.absolutePath}` permission denied.")
         if (input.name.toByteArray().size > 512 - (1 + 32 + 2 + 11) ) throw InvalidNameException("File name is large") // Head File is 512 Byte => 1 Byte to Store Version of Program , 32 Byte to store Secret Key , 2 Byte to Controller , other Byte to File name , 11 is padding
 
-        if (!dir_output.exists()) throw FileAlreadyExistsException("`${dir_output.exists()}` is not exist.")
+        if (!dir_output.exists()) throw FileAlreadyExistsException ("`${dir_output.exists()}` is not exist.")
         if (!dir_output.isDirectory) throw InvalidPathException("`${dir_output.absolutePath}` is not a directory.", null)
         if (!dir_output.canWrite()) throw NoPermissionException("`${dir_output.absolutePath}` : Permission Denied.")
 
@@ -131,14 +130,37 @@ class Encryption{
     }
 
     //write and read File
-    fun Encrypt(){
+    fun Encrypt(listener : ((p : Int) -> Unit)? = null){
+        /*
+        * this Encrypt the File
+        * */
+        var outputStream = outFile.outputStream()
+        //First Write Head
+        var key = writeHead(outputStream)
 
+        //init cipher to coding
+        var cipher = Cipher.getInstance(AES)
+        cipher.init(Cipher.ENCRYPT_MODE , key)
+
+        //get from input , Encrypt it and write it to output
+        //get available byte an calc to call listener
+        val total = inStream.available()
+        val buff = ByteArray(FILE_READ_BUFF)
+        var i = inStream.read(buff)
+        while (i != -1){
+            outputStream.write(cipher.doFinal(buff))
+            i = inStream.read(buff)
+            listener?.let { it((output.length() / total * 100).toInt()) }
+        }
+        inStream.close()
+        outputStream.close()
     }
     companion object{
         const val VERSION : Byte = 1
         const val AES = "AES"
         const val RSA = "RSA"
         const val TYPE = "ema"
+        private const val FILE_READ_BUFF = 2048
         private data class HeadFile(val version : Byte , val key: SecretKey , val controller : Short , val name : String) // data class for store read head file
     }
 }
