@@ -42,7 +42,7 @@ class KeyStorage {
             val key_pair = readPairKey(pass)
             this.publicKey = key_pair.public
             this.privateKey = key_pair.private
-        }catch (e : Exception) {throw PassError("Invalid pass word")}
+        }catch (e : Exception) {throw PassError("Invalid password")}
 
         //start load all public key
         loadKeyFiles()
@@ -101,19 +101,10 @@ class KeyStorage {
 
         return KeyFactory.getInstance(RSA).generatePublic(X509EncodedKeySpec(key_bytes))
     }
-
-    //self public and private key set add generate and regenerate method
-    fun generatePairKey(pass : String){
-        /*
-        * this method generate the private and public key ans store it to a file
-        * */
-
-        //init generator
-        val key_generetor = KeyPairGenerator.getInstance(RSA)
-        key_generetor.initialize(4096)
-
-
+    fun getAll() : ArrayList<String>{
+        return keys.clone() as ArrayList<String>
     }
+
     fun getPublicKey() : PublicKey{
         return this.publicKey?:throw NoKeyFound("KeyNotFound")
     }
