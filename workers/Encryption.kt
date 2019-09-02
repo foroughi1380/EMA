@@ -208,7 +208,7 @@ class Encryption{
             i = inStream.read(buff)
             listener?.let { it((file.length() / total * 100).toInt())}
         }
-
+        inStream.close()
     }
     companion object{
         const val VERSION : Byte = 1
