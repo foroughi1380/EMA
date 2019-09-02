@@ -111,6 +111,7 @@ class KeyStorage {
     fun getPrivateKey() : PrivateKey{
         return this.privateKey?:throw NoKeyFound("KeyNotFound")
     }
+
     //main utility functions
     private fun loadKeyFiles(){
         /*
@@ -157,6 +158,7 @@ class KeyStorage {
 
         return pair
     }
+
     companion object{
         private const val PAIR_FILE_TYPE = "pairema"
         private const val PAIR_FILE_FULL_NAME_STORAGE = "self.$PAIR_FILE_TYPE"
