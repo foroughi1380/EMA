@@ -156,7 +156,21 @@ class KeyStorage {
 
         return pair
     }
+    private fun exportPairKey(dir : File){
+        /*
+        * this method copy the self key to dir
+        * */
 
+        //check validation
+        if (! dir.exists()) throw DirectoryNotExist("`${dir.path}` not found")
+        if (! (dir.canRead() && dir.canWrite())) throw NoPermissionException("`${dir.path}` permission denied.")
+
+        //start copy
+        val key_byte = File(this.dir , PAIR_FILE_FULL_NAME_STORAGE).readBytes()
+
+        val output = File(dir , "Keyexport.$PAIR_FILE_TYPE")
+        output.writeBytes(key_byte)
+    }
     companion object{
         private const val PAIR_FILE_TYPE = "pairema"
         private const val PAIR_FILE_FULL_NAME_STORAGE = "self.$PAIR_FILE_TYPE"
