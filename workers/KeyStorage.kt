@@ -1,16 +1,14 @@
 package workers;
 
-import com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations.PrivateKeyResolver
+import com.sun.media.sound.InvalidFormatException
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
-import java.lang.Exception
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.InvalidPathException
 import java.nio.file.NotDirectoryException
 import java.security.*
-import java.security.spec.RSAPublicKeySpec
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.CipherInputStream
@@ -211,6 +209,26 @@ class KeyStorage {
             writer.close()
 
             return KeyStorage(dir , pass)
+        }
+        fun importKey(dir : File , key : File){
+            /*
+            * this method copy the key file to directory with self key name
+            * */
+
+            //check validation
+            if (! dir.exists()) throw DirectoryNotExist("`${dir.path}` is not exist.")
+            if (! dir.isDirectory) throw NotDirectoryException("`${dir.path}` is not a directory.")
+            if (! (dir.canRead() && dir.canWrite())) throw NoPermissionException("`${dir.path}` permission denied.")
+
+            if (! key.exists()) throw NoKeyFound("`${dir.path}` not exist.")
+            if (key.name.split(".")[-1] != PAIR_FILE_TYPE) throw InvalidFormatException("`${dir.path}` is invalid file!")
+
+            //create file output
+            val file = File(dir , PAIR_FILE_FULL_NAME_STORAGE)
+
+            //copy key to file
+            var key_byte = key.readBytes()
+            key.writeBytes(key_byte)
         }
     }
 }
