@@ -3,6 +3,7 @@ package workers
 import java.io.*
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.InvalidPathException
+import java.nio.file.NotDirectoryException
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.util.RandomAccess
@@ -34,7 +35,7 @@ class Encryption{
         if (!input.canRead()) throw NoPermissionException("`${input.absolutePath}` permission denied.")
         if (input.name.toByteArray().size > 512 - (1 + 32 + 2 + 11) ) throw InvalidNameException("File name is large") // Head File is 512 Byte => 1 Byte to Store Version of Program , 32 Byte to store Secret Key , 2 Byte to Controller , other Byte to File name , 11 is padding
 
-        if (!dir_output.exists()) throw FileAlreadyExistsException ("`${dir_output.exists()}` is not exist.")
+        if (!dir_output.exists()) throw FileNotFoundException ("`${dir_output.exists()}` is not exist.")
         if (!dir_output.isDirectory) throw InvalidPathException("`${dir_output.absolutePath}` is not a directory.", null)
         if (!dir_output.canWrite()) throw NoPermissionException("`${dir_output.absolutePath}` : Permission Denied.")
 
