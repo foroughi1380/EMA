@@ -1,10 +1,12 @@
 import workers.Encryption
 import workers.KeyStorage
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.file.InvalidPathException
 import java.nio.file.NotDirectoryException
 import java.security.PrivateKey
 import java.security.PublicKey
+import javax.naming.InvalidNameException
 
 class EncryptionHelper{
     private lateinit var encryption : Encryption
@@ -81,6 +83,51 @@ class EncryptionHelper{
         this.publicKey = storage.getPublicKey()
     }
 
+
+    private fun initEncryption(file : File , dir : File , outputName: String? = null , listener : EncryptListenerI) : Encryption?{
+        /*
+        * this method create a Encryption object handle it's Exception an return it
+        * */
+        var ret : Encryption? = null
+
+        try {
+            ret = Encryption(file , dir , publicKey , privateKey)
+        }catch (fe : FileNotFoundException){
+            listener.encryptFileNoExist()
+        }catch (fe : InvalidPathException){
+            listener.encryptFileNoExist()
+        }catch (fe : KeyStorage.Companion.NoPermissionException){
+            listener.encryptPermissionError()
+        }catch (fe : InvalidNameException){
+            listener.encryptFileWrong()
+        }catch (de : Encryption.Companion.DirectoryNotExistException){
+            listener.encryptDirectoryNotExist()
+        }catch (de : Encryption.Companion.IsNotDirectory){
+            listener.encryptOutputNoDirectory()
+        }catch (e : java.lang.Exception){
+            listener.encryptError()
+        }
+
+
+        return ret
+    }
+    fun encrypt(file : File, dir : File, friend : String , listener : EncryptListenerI){
+        /*
+        * this method encrypt the input file
+        * */
+        val encrypt = initEncryption(file , dir , null , listener)
+        if (encrypt == null ){
+            listener.encryptError()
+            return
+        }
+
+        try {
+            encrypt.encrypt { listener.encryptPercent(it) }
+        }catch (e : java.lang.Exception){
+            listener.encryptError()
+        }
+    }
+
     companion object{
         interface InitListenerI{
             fun initDirError(dir : File , e : Exception)
@@ -103,5 +150,15 @@ class EncryptionHelper{
             fun keyFileNoFound()
             fun keyImportKey() : String
         }
+        interface EncryptListenerI{
+            fun encryptError()
+            fun encryptFileNoExist()
+            fun encryptFileWrong()
+            fun encryptPermissionError()
+            fun encryptDirectoryNotExist()
+            fun encryptOutputNoDirectory()
+            fun encryptPercent(percent : Int)
+        }
+
     }
 }
