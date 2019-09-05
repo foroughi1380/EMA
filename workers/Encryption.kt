@@ -37,7 +37,7 @@ class Encryption{
         if (input.name.toByteArray().size > 512 - (1 + 32 + 2 + 11) ) throw InvalidNameException("File name is large") // Head File is 512 Byte => 1 Byte to Store Version of Program , 32 Byte to store Secret Key , 2 Byte to Controller , other Byte to File name , 11 is padding
 
         if (!dir_output.exists()) throw DirectoryNotExistException ("`${dir_output.exists()}` is not exist.")
-        if (!dir_output.isDirectory) throw InvalidPathException("`${dir_output.absolutePath}` is not a directory.", null)
+        if (!dir_output.isDirectory) throw IsNotDirectory("`${dir_output.absolutePath}` is not a directory.", null)
         if (!dir_output.canWrite()) throw NoPermissionException("`${dir_output.absolutePath}` : Permission Denied.")
 
 
@@ -221,5 +221,6 @@ class Encryption{
         private const val FILE_READ_BUFF_DECODE = 2064
         private data class HeadFile(val version : Byte , val key: SecretKey , val size_controller : Short , val controller : Short , val name : String) // data class for store read head file
         class DirectoryNotExistException(message : String) : Exception(message)
+        class IsNotDirectory(message : String) : Exception(message)
     }
 }
