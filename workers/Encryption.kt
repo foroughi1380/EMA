@@ -37,7 +37,7 @@ class Encryption{
         if (input.name.toByteArray().size > 512 - (1 + 32 + 2 + 11) ) throw InvalidNameException("File name is large") // Head File is 512 Byte => 1 Byte to Store Version of Program , 32 Byte to store Secret Key , 2 Byte to Controller , other Byte to File name , 11 is padding
 
         if (!dir_output.exists()) throw DirectoryNotExistException ("`${dir_output.exists()}` is not exist.")
-        if (!dir_output.isDirectory) throw IsNotDirectory("`${dir_output.absolutePath}` is not a directory.", null)
+        if (!dir_output.isDirectory) throw IsNotDirectory("`${dir_output.absolutePath}` is not a directory.")
         if (!dir_output.canWrite()) throw NoPermissionException("`${dir_output.absolutePath}` : Permission Denied.")
 
 
