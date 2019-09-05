@@ -2,6 +2,7 @@ import workers.Encryption
 import workers.KeyStorage
 import java.io.File
 import java.io.FileNotFoundException
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.InvalidPathException
 import java.nio.file.NotDirectoryException
 import java.security.PrivateKey
@@ -143,6 +144,40 @@ class EncryptionHelper{
             listener.decryptError()
         }
     }
+
+    fun getFriends() : Array<String>{
+        /*
+        * this method return all public key names
+        * */
+
+        return storage.getAll() as Array<String>
+    }
+    fun addFriend(name : String , Key : File , listener : AddFriendListenerI){
+        /*
+        * this method add a public key to storage key
+        * */
+        try {
+            storage.add(name , publicKey)
+        }catch (e : FileAlreadyExistsException) {
+            listener.nameIsExist()
+        }catch (e : java.lang.Exception){
+            listener.addNameError()
+        }
+
+    }
+    fun removeFriend(name : String , listener : RemoveFriendListenerI){
+        /*
+        * this method remove a public key from storage key
+        * */
+        try {
+            this.storage.remove(name)
+        }catch (e : KeyStorage.Companion.NoKeyFound){
+            listener.nameIsNotExist()
+        }catch (e : java.lang.Exception){
+            listener.RemoevNameError()
+        }
+    }
+
     companion object{
         interface InitListenerI{
             fun initDirError(dir : File , e : Exception)
@@ -183,6 +218,13 @@ class EncryptionHelper{
             fun decryptError()
             fun decryptFileOverride(name : String) : Boolean
         }
-
+        interface AddFriendListenerI{
+            fun nameIsExist()
+            fun addNameError()
+        }
+        interface RemoveFriendListenerI{
+            fun nameIsNotExist()
+            fun RemoevNameError()
+        }
     }
 }
