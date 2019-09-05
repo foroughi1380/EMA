@@ -84,7 +84,7 @@ class EncryptionHelper{
     }
 
 
-    private fun initEncryption(file : File , dir : File , outputName: String? = null , listener : EncryptListenerI) : Encryption?{
+    private fun initEncryption(file : File , dir : File , outputName: String? = null , listener : InitEncryptionListenerI) : Encryption?{
         /*
         * this method create a Encryption object handle it's Exception an return it
         * */
@@ -93,19 +93,19 @@ class EncryptionHelper{
         try {
             ret = Encryption(file , dir , publicKey , privateKey)
         }catch (fe : FileNotFoundException){
-            listener.encryptFileNoExist()
+            listener.initEncryptionFileNoExist()
         }catch (fe : InvalidPathException){
-            listener.encryptFileNoExist()
+            listener.initEncryptionFileNoExist()
         }catch (fe : KeyStorage.Companion.NoPermissionException){
-            listener.encryptPermissionError()
+            listener.initEncryptionPermissionError()
         }catch (fe : InvalidNameException){
-            listener.encryptFileWrong()
+            listener.initEncryptionFileWrong()
         }catch (de : Encryption.Companion.DirectoryNotExistException){
-            listener.encryptDirectoryNotExist()
+            listener.initEncryptionDirectoryNotExist()
         }catch (de : Encryption.Companion.IsNotDirectory){
-            listener.encryptOutputNoDirectory()
+            listener.initEncryptionOutputNoDirectory()
         }catch (e : java.lang.Exception){
-            listener.encryptError()
+            listener.initEncryptionError()
         }
 
 
@@ -117,7 +117,7 @@ class EncryptionHelper{
         * */
         val encrypt = initEncryption(file , dir , null , listener)
         if (encrypt == null ){
-            listener.encryptError()
+            listener.initEncryptionError()
             return
         }
 
@@ -127,7 +127,22 @@ class EncryptionHelper{
             listener.encryptError()
         }
     }
+    fun decrypt(file : File , dir : File , listener: DecryptListenerI){
+        /*
+        * this method decrypt file to directory
+        * */
+        val encryption = initEncryption(file ,dir , null , listener)
+        if (encryption == null ){
+            listener.initEncryptionError()
+            return
+        }
 
+        try {
+            encryption.decrypt({listener.decryptPercent(it)} , listener::decryptFileOverride)
+        }catch (e : java.lang.Exception){
+            listener.decryptError()
+        }
+    }
     companion object{
         interface InitListenerI{
             fun initDirError(dir : File , e : Exception)
@@ -150,14 +165,23 @@ class EncryptionHelper{
             fun keyFileNoFound()
             fun keyImportKey() : String
         }
-        interface EncryptListenerI{
-            fun encryptError()
-            fun encryptFileNoExist()
-            fun encryptFileWrong()
-            fun encryptPermissionError()
-            fun encryptDirectoryNotExist()
-            fun encryptOutputNoDirectory()
+
+        interface InitEncryptionListenerI{
+            fun initEncryptionError()
+            fun initEncryptionFileNoExist()
+            fun initEncryptionFileWrong()
+            fun initEncryptionPermissionError()
+            fun initEncryptionDirectoryNotExist()
+            fun initEncryptionOutputNoDirectory()
+        }
+        interface EncryptListenerI : InitEncryptionListenerI{
             fun encryptPercent(percent : Int)
+            fun encryptError()
+        }
+        interface DecryptListenerI : InitEncryptionListenerI{
+            fun decryptPercent(percent : Int)
+            fun decryptError()
+            fun decryptFileOverride(name : String) : Boolean
         }
 
     }
