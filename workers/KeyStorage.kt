@@ -1,13 +1,9 @@
 package workers;
 
-import com.sun.media.sound.InvalidFormatException
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
-import java.nio.file.FileAlreadyExistsException
-import java.nio.file.InvalidPathException
-import java.nio.file.NotDirectoryException
 import java.security.*
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
@@ -27,7 +23,7 @@ class KeyStorage {
         if (! dir.exists()) throw DirectoryNotExist("`${dir.absolutePath}` is not exist.")
         if (! dir.isDirectory) throw NotDirectoryException("`${dir.absolutePath}` is not a directory.")
         if (! (dir.canWrite() && dir.canRead())) throw NoPermissionException("`${dir.absolutePath}` Permission denied.")
-        if (! File(dir , PAIR_FILE_FULL_NAME_STORAGE).exists()) throw InvalidPathException("`${dir.absolutePath}` Invalid path." , null)
+        if (! File(dir , PAIR_FILE_FULL_NAME_STORAGE).exists()) throw InvalidPathException("`${dir.absolutePath}` Invalid path.")
 
 
         //init vars
@@ -183,6 +179,11 @@ class KeyStorage {
         class NoKeyFound(message : String) : Exception(message)
         class CanNotRemoveFile(message : String) : Exception(message)
         class PassError(message : String) : Exception(message)
+        class InvalidFormatException(message : String) : Exception(message)
+        class FileAlreadyExistsException(message : String) : Exception(message)
+        class NotDirectoryException(message : String) : Exception(message)
+        class InvalidPathException(message : String) : Exception(message)
+
 
         //static functions
         fun createNewKeyDir(dir : File , pass : String) : KeyStorage{

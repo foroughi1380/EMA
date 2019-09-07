@@ -1,20 +1,12 @@
 package workers
 
 import java.io.*
-import java.lang.Exception
-import java.nio.file.FileAlreadyExistsException
-import java.nio.file.InvalidPathException
-import java.nio.file.NotDirectoryException
 import java.security.PrivateKey
 import java.security.PublicKey
-import java.util.RandomAccess
-import java.util.zip.Deflater
-import javax.crypto.*
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
-import javax.naming.InvalidNameException
-import javax.naming.NoPermissionException
-import javax.print.attribute.standard.Compression
-
 
 class Encryption{
 
@@ -32,7 +24,7 @@ class Encryption{
 
         /*check validation*/
         if (!input.exists()) throw FileNotFoundException("`${input.absolutePath}` is not exist.")
-        if (!input.isFile) throw InvalidPathException("`${input.absolutePath}` is not a File.", null)
+        if (!input.isFile) throw InvalidPathException("`${input.absolutePath}` is not a File.")
         if (!input.canRead()) throw NoPermissionException("`${input.absolutePath}` permission denied.")
         if (input.name.toByteArray().size > 512 - (1 + 32 + 2 + 11) ) throw InvalidNameException("File name is large") // Head File is 512 Byte => 1 Byte to Store Version of Program , 32 Byte to store Secret Key , 2 Byte to Controller , other Byte to File name , 11 is padding
 
@@ -222,5 +214,8 @@ class Encryption{
         private data class HeadFile(val version : Byte , val key: SecretKey , val size_controller : Short , val controller : Short , val name : String) // data class for store read head file
         class DirectoryNotExistException(message : String) : Exception(message)
         class IsNotDirectory(message : String) : Exception(message)
+        class NoPermissionException(message : String) : Exception(message)
+        class InvalidPathException(message : String) : Exception(message)
+        class InvalidNameException(message : String) : Exception(message)
     }
 }

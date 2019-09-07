@@ -7,7 +7,6 @@ import java.nio.file.InvalidPathException
 import java.nio.file.NotDirectoryException
 import java.security.PrivateKey
 import java.security.PublicKey
-import javax.naming.InvalidNameException
 
 class EncryptionHelper{
     private lateinit var encryption : Encryption
@@ -27,7 +26,7 @@ class EncryptionHelper{
             listener.initDirError(dir ,de)
             return
 
-        }catch (de : NotDirectoryException){
+        }catch (de : KeyStorage.Companion.NotDirectoryException){
 
             listener.initDirError(dir , de)
             return
@@ -37,7 +36,7 @@ class EncryptionHelper{
             listener.initPermissionDenied()
             return
 
-        }catch (de : InvalidPathException){
+        }catch (de : KeyStorage.Companion.InvalidPathException){
 
             val res = listener.initInvalidKeyDirectory(dir)
             if (res.status == InitListenerI.Companion.NewKeyQ.Companion.Status.New){
@@ -95,11 +94,11 @@ class EncryptionHelper{
             ret = Encryption(file , dir , publicKey , privateKey)
         }catch (fe : FileNotFoundException){
             listener.initEncryptionFileNoExist()
-        }catch (fe : InvalidPathException){
+        }catch (fe : Encryption.Companion.InvalidPathException){
             listener.initEncryptionFileNoExist()
-        }catch (fe : KeyStorage.Companion.NoPermissionException){
+        }catch (fe : Encryption.Companion.NoPermissionException){
             listener.initEncryptionPermissionError()
-        }catch (fe : InvalidNameException){
+        }catch (fe : Encryption.Companion.InvalidNameException){
             listener.initEncryptionFileWrong()
         }catch (de : Encryption.Companion.DirectoryNotExistException){
             listener.initEncryptionDirectoryNotExist()
@@ -174,7 +173,7 @@ class EncryptionHelper{
         }catch (e : KeyStorage.Companion.NoKeyFound){
             listener.nameIsNotExist()
         }catch (e : java.lang.Exception){
-            listener.RemoevNameError()
+            listener.remoevNameError()
         }
     }
 
@@ -224,7 +223,7 @@ class EncryptionHelper{
         }
         interface RemoveFriendListenerI{
             fun nameIsNotExist()
-            fun RemoevNameError()
+            fun remoevNameError()
         }
     }
 }
