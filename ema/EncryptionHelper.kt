@@ -1,6 +1,6 @@
 package ema
-import workers.Encryption
-import workers.KeyStorage
+import ema.workers.Encryption
+import ema.workers.KeyStorage
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.FileAlreadyExistsException
