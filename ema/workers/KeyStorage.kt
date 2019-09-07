@@ -168,7 +168,7 @@ class KeyStorage {
         output.writeBytes(key_byte)
     }
     companion object{
-        private const val PAIR_FILE_TYPE = "pairema"
+        const val PAIR_FILE_TYPE = "pairema"
         private const val PAIR_FILE_FULL_NAME_STORAGE = "self.$PAIR_FILE_TYPE"
         private const val KEY_TYPE = "key"
         private const val RSA = "RSA"
