@@ -1,3 +1,0 @@
-# Ema
-
-File Encryption Program
